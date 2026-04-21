@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metroqual — Monitor de Licitações</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1e2d45;
+    --accent: #0ea5e9;
+    --accent2: #38bdf8;
+    --gold: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --subtle: #334155;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* LOGIN */
+  #login-screen {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+    background-image: radial-gradient(ellipse at 20% 50%, rgba(14,165,233,0.07) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 20%, rgba(245,158,11,0.05) 0%, transparent 50%);
+  }
+
+  .login-box {
+    width: 380px;
+    padding: 48px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .login-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+
+  .login-logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .login-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+
+  .login-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 36px;
+    letter-spacing: 0.05em;
+  }
+
+  .login-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .login-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 24px;
+  }
+
+  .login-input:focus { border-color: var(--accent); }
+
+  .login-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .login-btn:hover { background: var(--accent2); }
+  .login-btn:active { transform: scale(0.99); }
+
+  .login-error {
+    margin-top: 14px;
+    font-size: 11px;
+    color: var(--red);
+    text-align: center;
+    display: none;
+    letter-spacing: 0.05em;
+  }
+
+  /* APP */
+  #app { display: none; }
+
+  /* HEADER */
+  header {
+    padding: 0 32px;
+    height: 60px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+
+  .header-brand {
+    display: flex; align-items: center; gap: 14px;
+  }
+
+  .brand-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    color: #fff;
+    letter-spacing: -0.05em;
+  }
+
+  .brand-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .brand-tag {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .header-right {
+    display: flex; align-items: center; gap: 16px;
+  }
+
+  .header-date {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .logout-btn {
+    font-size: 10px;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 5px 12px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.1em;
+    transition: all 0.2s;
+  }
+  .logout-btn:hover { color: var(--text); border-color: var(--subtle); }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    background: var(--surface);
+  }
+
+  .tab {
+    padding: 14px 24px;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+    background: none;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .tab-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+  .tab.active .tab-dot { background: var(--accent); }
+
+  /* MAIN */
+  main { padding: 32px; max-width: 1400px; margin: 0 auto; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* FILTERS CARD */
+  .filters-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 28px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .filters-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--accent);
+  }
+
+  .filters-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    align-items: end;
+  }
+
+  .filter-group { display: flex; flex-direction: column; gap: 6px; }
+
+  .filter-label {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .filter-input, .filter-select {
+    padding: 9px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .filter-input:focus, .filter-select:focus { border-color: var(--accent); }
+  .filter-select { cursor: pointer; }
+  .filter-select option { background: var(--surface); }
+
+  .search-btn {
+    padding: 10px 24px;
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .search-btn:hover { background: var(--accent2); }
+  .search-btn:disabled { background: var(--subtle); cursor: not-allowed; }
+
+  .export-btn {
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .export-btn:hover { color: var(--text); border-color: var(--subtle); }
+  .export-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* STATS */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .stat-value.accent { color: var(--accent); }
+  .stat-value.gold { color: var(--gold); }
+  .stat-value.green { color: var(--green); }
+
+  /* RESULTS */
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .results-count {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .results-count span {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  thead tr {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    padding: 12px 16px;
+    text-align: left;
+    font-family: 'Syne', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+
+  td {
+    padding: 14px 16px;
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .td-object {
+    max-width: 320px;
+    color: var(--text);
+  }
+
+  .td-orgao {
+    max-width: 200px;
+    color: var(--text);
+  }
+
+  .td-valor {
+    white-space: nowrap;
+    color: var(--green);
+    font-weight: 500;
+  }
+
+  .td-date {
+    white-space: nowrap;
+    color: var(--muted);
+  }
+
+  .td-link a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+  }
+  .td-link a:hover { border-bottom-color: var(--accent); }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+    border-radius: 2px;
+  }
+
+  .badge-uni { background: rgba(14,165,233,0.15); color: var(--accent); }
+  .badge-if { background: rgba(245,158,11,0.15); color: var(--gold); }
+  .badge-fed { background: rgba(99,102,241,0.15); color: #818cf8; }
+  .badge-other { background: rgba(100,116,139,0.15); color: var(--muted); }
+
+  /* CONCORRENTE BADGE */
+  .badge-concorrente {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    background: rgba(239,68,68,0.12);
+    color: #f87171;
+    border-radius: 2px;
+  }
+
+  /* LOADING */
+  .loading-wrap {
+    padding: 60px;
+    text-align: center;
+    display: none;
+  }
+
+  .loading-wrap.visible { display: block; }
+
+  .spinner {
+    width: 32px; height: 32px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* EMPTY */
+  .empty-wrap {
+    padding: 60px;
+    text-align: center;
+    display: none;
+  }
+  .empty-wrap.visible { display: block; }
+
+  .empty-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.4; }
+
+  .empty-text {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* CONCORRENTES GRID */
+  .concorrentes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .concorrente-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .concorrente-chip:hover { border-color: var(--subtle); }
+  .concorrente-chip.selected { border-color: var(--accent); background: rgba(14,165,233,0.06); }
+
+  .chip-check {
+    width: 16px; height: 16px;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .concorrente-chip.selected .chip-check {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .chip-info { flex: 1; min-width: 0; }
+
+  .chip-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .chip-cnpj {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+  }
+
+  .select-all-btn {
+    font-size: 10px;
+    color: var(--accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.05em;
+    padding: 0;
+    margin-bottom: 12px;
+    display: inline-block;
+  }
+
+  .select-all-btn:hover { text-decoration: underline; }
+
+  /* PAGINATION */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .page-btn {
+    width: 32px; height: 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .page-btn:hover { border-color: var(--subtle); color: var(--text); }
+  .page-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .page-info {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    padding: 0 8px;
+  }
+
+  /* ALERT */
+  .alert {
+    padding: 12px 16px;
+    border-left: 3px solid var(--gold);
+    background: rgba(245,158,11,0.06);
+    margin-bottom: 20px;
+    font-size: 11px;
+    color: var(--text);
+    letter-spacing: 0.03em;
+    line-height: 1.6;
+    display: none;
+  }
+  .alert.visible { display: block; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    main { padding: 16px; }
+    header { padding: 0 16px; }
+    .tabs { padding: 0 16px; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .filters-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Metroqual</div>
+    <div class="login-title">Monitor de<br>Licitações</div>
+    <div class="login-sub">Acesso restrito — uso interno</div>
+    <label class="login-label">Senha de acesso</label>
+    <input type="password" class="login-input" id="login-pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-error">Senha incorreta. Tente novamente.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <header>
+    <div class="header-brand">
+      <div class="brand-icon">MQ</div>
+      <div>
+        <div class="brand-name">Metroqual</div>
+        <div class="brand-tag">Monitor de Licitações — PNCP</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-date" id="header-date"></div>
+      <button class="logout-btn" onclick="doLogout()">Sair</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('editais', this)">
+      <div class="tab-dot"></div>
+      Editais
+    </button>
+    <button class="tab" onclick="switchTab('concorrentes', this)">
+      <div class="tab-dot"></div>
+      Concorrentes
+    </button>
+  </div>
+
+  <main>
+
+    <!-- PANEL EDITAIS -->
+    <div class="panel active" id="panel-editais">
+
+      <div class="filters-card">
+        <div class="filters-title">▸ Filtros de Busca — Editais</div>
+        <div class="filters-grid">
+          <div class="filter-group" style="grid-column: span 2;">
+            <label class="filter-label">Palavra-chave</label>
+            <input type="text" class="filter-input" id="ed-keyword" value="calibração" placeholder="ex: calibração, máquina de ensaio, prensa">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Data início</label>
+            <input type="date" class="filter-input" id="ed-date-start">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Data fim</label>
+            <input type="date" class="filter-input" id="ed-date-end">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Tipo de órgão</label>
+            <select class="filter-select" id="ed-orgao-tipo">
+              <option value="">Todos</option>
+              <option value="universidade">Universidades Federais</option>
+              <option value="instituto federal">Institutos Federais</option>
+              <option value="instituto de pesquisa">Institutos de Pesquisa</option>
+              <option value="senai">SENAI / SESI</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Modalidade</label>
+            <select class="filter-select" id="ed-modalidade">
+              <option value="">Todas</option>
+              <option value="1">Leilão</option>
+              <option value="2">Diálogo Competitivo</option>
+              <option value="3">Concurso</option>
+              <option value="4">Concorrência</option>
+              <option value="5">Pregão</option>
+              <option value="6">Dispensa de Licitação</option>
+              <option value="7">Inexigibilidade</option>
+              <option value="8">Manifestação de Interesse</option>
+              <option value="9">Pré-qualificação</option>
+              <option value="10">Credenciamento</option>
+            </select>
+          </div>
+          <div class="filter-group" style="display:flex; flex-direction:row; gap:8px; align-items:flex-end;">
+            <button class="search-btn" id="btn-buscar-editais" onclick="buscarEditais()">
+              <span>🔍</span> Buscar
+            </button>
+            <button class="export-btn" id="btn-export-editais" onclick="exportarCSV('editais')" disabled>
+              ↓ CSV
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert" id="alert-editais"></div>
+
+      <div class="stats-row" id="stats-editais" style="display:none;">
+        <div class="stat-card">
+          <div class="stat-label">Resultados</div>
+          <div class="stat-value accent" id="stat-total">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Universidades</div>
+          <div class="stat-value gold" id="stat-uni">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Inst. Federais</div>
+          <div class="stat-value" id="stat-if">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Valor Est. Total</div>
+          <div class="stat-value green" id="stat-valor" style="font-size:16px;">—</div>
+        </div>
+      </div>
+
+      <div class="loading-wrap" id="loading-editais">
+        <div class="spinner"></div>
+        <div class="loading-text">Consultando PNCP...</div>
+      </div>
+
+      <div class="empty-wrap" id="empty-editais">
+        <div class="empty-icon">◎</div>
+        <div class="empty-text">Nenhum resultado encontrado para os filtros aplicados.</div>
+      </div>
+
+      <div id="results-editais-wrap" style="display:none;">
+        <div class="results-header">
+          <div class="results-count" id="results-count-editais"></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Objeto</th>
+                <th>Órgão</th>
+                <th>Tipo</th>
+                <th>Modalidade</th>
+                <th>Valor Est.</th>
+                <th>Publicação</th>
+                <th>Abertura</th>
+                <th>Link</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-editais"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="pag-editais"></div>
+      </div>
+
+    </div>
+
+    <!-- PANEL CONCORRENTES -->
+    <div class="panel" id="panel-concorrentes">
+
+      <div class="filters-card">
+        <div class="filters-title">▸ Monitoramento de Concorrentes — Contratos Vencidos</div>
+
+        <div style="margin-bottom:20px;">
+          <div class="filter-label" style="margin-bottom:10px;">Selecionar concorrentes</div>
+          <button class="select-all-btn" onclick="toggleSelectAll()">Selecionar / Desselecionar todos</button>
+          <div class="concorrentes-grid" id="concorrentes-chips"></div>
+        </div>
+
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label class="filter-label">Data início</label>
+            <input type="date" class="filter-input" id="con-date-start">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Data fim</label>
+            <input type="date" class="filter-input" id="con-date-end">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Tipo de órgão</label>
+            <select class="filter-select" id="con-orgao-tipo">
+              <option value="">Todos</option>
+              <option value="universidade">Universidades Federais</option>
+              <option value="instituto federal">Institutos Federais</option>
+              <option value="instituto de pesquisa">Institutos de Pesquisa</option>
+            </select>
+          </div>
+          <div class="filter-group" style="display:flex; flex-direction:row; gap:8px; align-items:flex-end;">
+            <button class="search-btn" id="btn-buscar-con" onclick="buscarConcorrentes()">
+              <span>🔍</span> Buscar
+            </button>
+            <button class="export-btn" id="btn-export-con" onclick="exportarCSV('concorrentes')" disabled>
+              ↓ CSV
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert" id="alert-con"></div>
+
+      <div class="stats-row" id="stats-con" style="display:none;">
+        <div class="stat-card">
+          <div class="stat-label">Contratos encontrados</div>
+          <div class="stat-value accent" id="stat-con-total">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Concorrentes ativos</div>
+          <div class="stat-value gold" id="stat-con-empresas">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Para universidades/IFs</div>
+          <div class="stat-value" id="stat-con-uni">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Valor total vencido</div>
+          <div class="stat-value green" id="stat-con-valor" style="font-size:16px;">—</div>
+        </div>
+      </div>
+
+      <div class="loading-wrap" id="loading-con">
+        <div class="spinner"></div>
+        <div class="loading-text">Consultando contratos no PNCP...</div>
+      </div>
+
+      <div class="empty-wrap" id="empty-con">
+        <div class="empty-icon">◎</div>
+        <div class="empty-text">Nenhum contrato encontrado para os filtros aplicados.</div>
+      </div>
+
+      <div id="results-con-wrap" style="display:none;">
+        <div class="results-header">
+          <div class="results-count" id="results-count-con"></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Concorrente</th>
+                <th>Objeto</th>
+                <th>Órgão Contratante</th>
+                <th>Tipo</th>
+                <th>Valor</th>
+                <th>Data Assinatura</th>
+                <th>Vigência</th>
+                <th>Link</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-con"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="pag-con"></div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ============================
+// CONFIG
+// ============================
+const SENHA = 'metroqual2025';
+
+const CONCORRENTES = [
+  { nome: 'Instron',      razao: 'Instron Brasil Equip. Científicos',  cnpj: '42168526000125' },
+  { nome: 'Intermetric',  razao: 'Intermetric Instrumentos Ltda',      cnpj: '05203241000151' },
+  { nome: 'Arotec',       razao: 'Arotec S/A Indústria e Comércio',    cnpj: '43547702000100' },
+  { nome: 'Solotest',     razao: 'Solotest Ap. para Mecânica do Solo', cnpj: '60820321000164' },
+  { nome: 'Contenco',     razao: 'Contenco Indústria e Comércio',      cnpj: '17154931000147' },
+  { nome: 'Quanteq',      razao: 'Quanteq Equipamentos de Ensaio',     cnpj: '08009137000119' },
+  { nome: 'EMBRACAL',     razao: 'Embracal – Emp. Bras. de Calibração',cnpj: '64542079000165' },
+  { nome: 'SIMMETRO',     razao: 'Simmetro – Metrologia e Manutenção', cnpj: '09439255000120' },
+];
+
+const MODALIDADES = {
+  1:'Leilão', 2:'Diálogo Competitivo', 3:'Concurso',
+  4:'Concorrência', 5:'Pregão', 6:'Dispensa',
+  7:'Inexigibilidade', 8:'Manif. Interesse',
+  9:'Pré-qualificação', 10:'Credenciamento'
+};
+
+let dadosEditais = [];
+let dadosCon = [];
+let pageEditais = 1;
+let pageCon = 1;
+const POR_PAGINA = 20;
+
+// ============================
+// LOGIN
+// ============================
+function doLogin() {
+  const v = document.getElementById('login-pwd').value;
+  if (v === SENHA) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initApp();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('login-pwd').value = '';
+    document.getElementById('login-pwd').focus();
+  }
+}
+
+function doLogout() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-pwd').value = '';
+}
+
+// ============================
+// INIT
+// ============================
+function initApp() {
+  // Data atual
+  const now = new Date();
+  document.getElementById('header-date').textContent =
+    now.toLocaleDateString('pt-BR', { weekday:'short', day:'2-digit', month:'short', year:'numeric' });
+
+  // Datas default: últimos 30 dias
+  const hoje = fmtDate(now);
+  const ha30 = fmtDate(new Date(now - 30*24*60*60*1000));
+  document.getElementById('ed-date-start').value = ha30;
+  document.getElementById('ed-date-end').value = hoje;
+  document.getElementById('con-date-start').value = ha30;
+  document.getElementById('con-date-end').value = hoje;
+
+  // Chips concorrentes
+  renderChips();
+}
+
+function fmtDate(d) {
+  return d.toISOString().split('T')[0];
+}
+
+// ============================
+// TABS
+// ============================
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+// ============================
+// CHIPS CONCORRENTES
+// ============================
+function renderChips() {
+  const container = document.getElementById('concorrentes-chips');
+  container.innerHTML = '';
+  CONCORRENTES.forEach((c, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'concorrente-chip selected';
+    chip.dataset.idx = i;
+    chip.innerHTML = `
+      <div class="chip-check">✓</div>
+      <div class="chip-info">
+        <div class="chip-name">${c.nome}</div>
+        <div class="chip-cnpj">${formatCNPJ(c.cnpj)}</div>
+      </div>`;
+    chip.onclick = () => toggleChip(chip);
+    container.appendChild(chip);
+  });
+}
+
+function toggleChip(chip) {
+  chip.classList.toggle('selected');
+  chip.querySelector('.chip-check').textContent = chip.classList.contains('selected') ? '✓' : '';
+}
+
+function toggleSelectAll() {
+  const chips = document.querySelectorAll('.concorrente-chip');
+  const allSelected = [...chips].every(c => c.classList.contains('selected'));
+  chips.forEach(chip => {
+    if (allSelected) {
+      chip.classList.remove('selected');
+      chip.querySelector('.chip-check').textContent = '';
+    } else {
+      chip.classList.add('selected');
+      chip.querySelector('.chip-check').textContent = '✓';
+    }
+  });
+}
+
+function getSelectedCNPJs() {
+  return [...document.querySelectorAll('.concorrente-chip.selected')]
+    .map(c => CONCORRENTES[c.dataset.idx].cnpj);
+}
+
+function getConcorrenteByConjpj(cnpj) {
+  return CONCORRENTES.find(c => c.cnpj === cnpj.replace(/\D/g,''));
+}
+
+// ============================
+// UTILS
+// ============================
+function formatCNPJ(s) {
+  return s.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+}
+
+function fmtValor(v) {
+  if (!v) return '—';
+  return 'R$ ' + parseFloat(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fmtDataBR(s) {
+  if (!s) return '—';
+  return s.substring(0,10).split('-').reverse().join('/');
+}
+
+function orgaoTipo(nome) {
+  if (!nome) return 'other';
+  const n = nome.toLowerCase();
+  if (n.includes('universidade') || n.includes('ufpr') || n.includes('usp') || n.includes('ufsc') || n.includes('ufrgs') || n.includes('ufmg') || n.includes('ufrj') || n.includes('unifesp') || n.includes('ufpe') || n.includes('ufc') || n.includes('ufba') || n.includes('ufam')) return 'uni';
+  if (n.includes('instituto federal') || n.includes(' if ') || n.includes('ifpr') || n.includes('ifsp') || n.includes('ifsc') || n.includes('ifrs') || n.includes('cefet')) return 'if';
+  if (n.includes('instituto') && (n.includes('pesquisa') || n.includes('tecnologia') || n.includes('ipt') || n.includes('lactec') || n.includes('inpe') || n.includes('embrapa'))) return 'pesquisa';
+  if (n.includes('senai') || n.includes('sesi') || n.includes('sebrae')) return 'senai';
+  return 'other';
+}
+
+function orgaoBadge(nome) {
+  const t = orgaoTipo(nome);
+  const map = {
+    uni: ['badge-uni','Universidade'],
+    if: ['badge-if','Inst. Federal'],
+    pesquisa: ['badge-fed','Pesquisa'],
+    senai: ['badge-fed','SENAI/SESI'],
+    other: ['badge-other','Outro'],
+  };
+  const [cls, label] = map[t];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function showEl(id, show) {
+  const el = document.getElementById(id);
+  if (show) { el.classList.add('visible'); el.style.display = ''; }
+  else { el.classList.remove('visible'); el.style.display = 'none'; }
+}
+
+function setAlert(id, msg) {
+  const el = document.getElementById(id);
+  if (msg) { el.textContent = msg; el.classList.add('visible'); }
+  else { el.classList.remove('visible'); }
+}
+
+// ============================
+// API PNCP
+// ============================
+const PNCP_BASE = 'https://pncp.gov.br/api/pncp/v1';
+
+async function apiGet(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+// ============================
+// BUSCAR EDITAIS
+// ============================
+async function buscarEditais() {
+  const keyword = document.getElementById('ed-keyword').value.trim();
+  const dateStart = document.getElementById('ed-date-start').value;
+  const dateEnd = document.getElementById('ed-date-end').value;
+  const modalidade = document.getElementById('ed-modalidade').value;
+  const orgaoTipoFiltro = document.getElementById('ed-orgao-tipo').value;
+
+  if (!keyword) { setAlert('alert-editais', '⚠ Informe ao menos uma palavra-chave.'); return; }
+  if (!dateStart || !dateEnd) { setAlert('alert-editais', '⚠ Informe o intervalo de datas.'); return; }
+  setAlert('alert-editais', '');
+
+  document.getElementById('btn-buscar-editais').disabled = true;
+  showEl('loading-editais', true);
+  document.getElementById('results-editais-wrap').style.display = 'none';
+  showEl('empty-editais', false);
+  document.getElementById('stats-editais').style.display = 'none';
+  document.getElementById('btn-export-editais').disabled = true;
+
+  try {
+    // PNCP: busca publicações
+    const dtIni = dateStart.replace(/-/g,'');
+    const dtFim = dateEnd.replace(/-/g,'');
+
+    let url = `${PNCP_BASE}/contratacoes/publicacao?dataInicial=${dtIni}&dataFinal=${dtFim}&tamanhoPagina=500&pagina=1`;
+    if (modalidade) url += `&codigoModalidadeContratacao=${modalidade}`;
+
+    const data = await apiGet(url);
+    let itens = data.data || [];
+
+    // Filtro por keyword
+    const kw = keyword.toLowerCase();
+    itens = itens.filter(i => {
+      const obj = (i.objetoCompra || i.descricao || '').toLowerCase();
+      return obj.includes(kw);
+    });
+
+    // Filtro por tipo de órgão
+    if (orgaoTipoFiltro) {
+      itens = itens.filter(i => {
+        const nome = (i.orgaoEntidade?.razaoSocial || i.nomeOrgao || '').toLowerCase();
+        return nome.includes(orgaoTipoFiltro);
+      });
+    }
+
+    dadosEditais = itens;
+    pageEditais = 1;
+    renderEditais();
+
+  } catch (e) {
+    setAlert('alert-editais', '⚠ Erro ao consultar a API do PNCP. Verifique sua conexão e tente novamente. Detalhe: ' + e.message);
+  } finally {
+    showEl('loading-editais', false);
+    document.getElementById('btn-buscar-editais').disabled = false;
+  }
+}
+
+function renderEditais() {
+  const dados = dadosEditais;
+
+  if (dados.length === 0) {
+    showEl('empty-editais', true);
+    document.getElementById('results-editais-wrap').style.display = 'none';
+    document.getElementById('stats-editais').style.display = 'none';
+    return;
+  }
+
+  // Stats
+  const totalUni = dados.filter(i => orgaoTipo(i.orgaoEntidade?.razaoSocial || i.nomeOrgao || '') === 'uni').length;
+  const totalIF = dados.filter(i => orgaoTipo(i.orgaoEntidade?.razaoSocial || i.nomeOrgao || '') === 'if').length;
+  const totalValor = dados.reduce((acc, i) => acc + parseFloat(i.valorTotalEstimado || i.valorEstimado || 0), 0);
+
+  document.getElementById('stat-total').textContent = dados.length;
+  document.getElementById('stat-uni').textContent = totalUni;
+  document.getElementById('stat-if').textContent = totalIF;
+  document.getElementById('stat-valor').textContent = totalValor > 0 ? fmtValor(totalValor) : '—';
+  document.getElementById('stats-editais').style.display = 'grid';
+
+  // Paginar
+  const inicio = (pageEditais - 1) * POR_PAGINA;
+  const pagina = dados.slice(inicio, inicio + POR_PAGINA);
+
+  const tbody = document.getElementById('tbody-editais');
+  tbody.innerHTML = '';
+
+  pagina.forEach(i => {
+    const orgao = i.orgaoEntidade?.razaoSocial || i.nomeOrgao || '—';
+    const modal = MODALIDADES[i.modalidadeId] || i.modalidadeNome || '—';
+    const numComp = i.numeroCompra || i.sequencialCompra || '';
+    const anoComp = i.anoCompra || '';
+    const cnpjOrgao = i.orgaoEntidade?.cnpj || '';
+    const link = numComp ? `https://pncp.gov.br/app/editais/${cnpjOrgao}/${anoComp}/${numComp}` : '#';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="td-object">${i.objetoCompra || i.descricao || '—'}</td>
+      <td class="td-orgao">${orgao}</td>
+      <td>${orgaoBadge(orgao)}</td>
+      <td><span class="badge badge-other">${modal}</span></td>
+      <td class="td-valor">${fmtValor(i.valorTotalEstimado || i.valorEstimado)}</td>
+      <td class="td-date">${fmtDataBR(i.dataPublicacaoPncp || i.dataPublicacao)}</td>
+      <td class="td-date">${fmtDataBR(i.dataAberturaProposta || i.dataAbertura)}</td>
+      <td class="td-link"><a href="${link}" target="_blank">↗ PNCP</a></td>`;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('results-count-editais').innerHTML =
+    `Exibindo <span>${pagina.length}</span> de <span>${dados.length}</span> resultados`;
+
+  renderPaginacao('pag-editais', dados.length, pageEditais, (p) => { pageEditais = p; renderEditais(); });
+
+  document.getElementById('results-editais-wrap').style.display = 'block';
+  showEl('empty-editais', false);
+  document.getElementById('btn-export-editais').disabled = false;
+}
+
+// ============================
+// BUSCAR CONCORRENTES
+// ============================
+async function buscarConcorrentes() {
+  const cnpjs = getSelectedCNPJs();
+  if (cnpjs.length === 0) { setAlert('alert-con', '⚠ Selecione ao menos um concorrente.'); return; }
+
+  const dateStart = document.getElementById('con-date-start').value;
+  const dateEnd = document.getElementById('con-date-end').value;
+  if (!dateStart || !dateEnd) { setAlert('alert-con', '⚠ Informe o intervalo de datas.'); return; }
+  setAlert('alert-con', '');
+
+  const orgaoTipoFiltro = document.getElementById('con-orgao-tipo').value;
+
+  document.getElementById('btn-buscar-con').disabled = true;
+  showEl('loading-con', true);
+  document.getElementById('results-con-wrap').style.display = 'none';
+  showEl('empty-con', false);
+  document.getElementById('stats-con').style.display = 'none';
+  document.getElementById('btn-export-con').disabled = true;
+
+  try {
+    const dtIni = dateStart.replace(/-/g,'');
+    const dtFim = dateEnd.replace(/-/g,'');
+
+    let todos = [];
+
+    // Busca contratos para cada CNPJ selecionado
+    for (const cnpj of cnpjs) {
+      try {
+        const url = `${PNCP_BASE}/contratos?cnpjFornecedor=${cnpj}&dataInicial=${dtIni}&dataFinal=${dtFim}&tamanhoPagina=100&pagina=1`;
+        const data = await apiGet(url);
+        const itens = (data.data || []).map(i => ({ ...i, _cnpjBuscado: cnpj }));
+        todos = todos.concat(itens);
+      } catch(e) {
+        // continua para próximo CNPJ
+      }
+    }
+
+    // Filtro tipo de órgão
+    if (orgaoTipoFiltro) {
+      todos = todos.filter(i => {
+        const nome = (i.orgaoEntidade?.razaoSocial || i.nomeOrgao || '').toLowerCase();
+        return nome.includes(orgaoTipoFiltro);
+      });
+    }
+
+    // Ordena por data desc
+    todos.sort((a,b) => {
+      const da = a.dataAssinatura || a.dataVigenciaInicio || '';
+      const db = b.dataAssinatura || b.dataVigenciaInicio || '';
+      return db.localeCompare(da);
+    });
+
+    dadosCon = todos;
+    pageCon = 1;
+    renderConcorrentes();
+
+  } catch(e) {
+    setAlert('alert-con', '⚠ Erro ao consultar a API do PNCP. Detalhe: ' + e.message);
+  } finally {
+    showEl('loading-con', false);
+    document.getElementById('btn-buscar-con').disabled = false;
+  }
+}
+
+function renderConcorrentes() {
+  const dados = dadosCon;
+
+  if (dados.length === 0) {
+    showEl('empty-con', true);
+    document.getElementById('results-con-wrap').style.display = 'none';
+    document.getElementById('stats-con').style.display = 'none';
+    return;
+  }
+
+  // Stats
+  const empresasAtivas = new Set(dados.map(i => i._cnpjBuscado)).size;
+  const totalUniIF = dados.filter(i => {
+    const t = orgaoTipo(i.orgaoEntidade?.razaoSocial || i.nomeOrgao || '');
+    return t === 'uni' || t === 'if';
+  }).length;
+  const totalValor = dados.reduce((acc, i) => acc + parseFloat(i.valorInicial || i.valorGlobal || 0), 0);
+
+  document.getElementById('stat-con-total').textContent = dados.length;
+  document.getElementById('stat-con-empresas').textContent = empresasAtivas;
+  document.getElementById('stat-con-uni').textContent = totalUniIF;
+  document.getElementById('stat-con-valor').textContent = totalValor > 0 ? fmtValor(totalValor) : '—';
+  document.getElementById('stats-con').style.display = 'grid';
+
+  // Paginar
+  const inicio = (pageCon - 1) * POR_PAGINA;
+  const pagina = dados.slice(inicio, inicio + POR_PAGINA);
+
+  const tbody = document.getElementById('tbody-con');
+  tbody.innerHTML = '';
+
+  pagina.forEach(i => {
+    const conc = getConcorrenteByConjpj(i._cnpjBuscado);
+    const orgao = i.orgaoEntidade?.razaoSocial || i.nomeOrgao || '—';
+    const cnpjOrgao = i.orgaoEntidade?.cnpj || '';
+    const numCon = i.numeroContrato || i.sequencialContrato || '';
+    const anoCon = i.anoContrato || '';
+    const link = numCon ? `https://pncp.gov.br/app/contratos/${cnpjOrgao}/${anoCon}/${numCon}` : '#';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="badge-concorrente">${conc ? conc.nome : i._cnpjBuscado}</span></td>
+      <td class="td-object">${i.objetoContrato || i.descricao || '—'}</td>
+      <td class="td-orgao">${orgao}</td>
+      <td>${orgaoBadge(orgao)}</td>
+      <td class="td-valor">${fmtValor(i.valorInicial || i.valorGlobal)}</td>
+      <td class="td-date">${fmtDataBR(i.dataAssinatura)}</td>
+      <td class="td-date">${fmtDataBR(i.dataVigenciaInicio)} → ${fmtDataBR(i.dataVigenciaFim)}</td>
+      <td class="td-link"><a href="${link}" target="_blank">↗ PNCP</a></td>`;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('results-count-con').innerHTML =
+    `Exibindo <span>${pagina.length}</span> de <span>${dados.length}</span> contratos`;
+
+  renderPaginacao('pag-con', dados.length, pageCon, (p) => { pageCon = p; renderConcorrentes(); });
+
+  document.getElementById('results-con-wrap').style.display = 'block';
+  showEl('empty-con', false);
+  document.getElementById('btn-export-con').disabled = false;
+}
+
+// ============================
+// PAGINAÇÃO
+// ============================
+function renderPaginacao(containerId, total, paginaAtual, onPage) {
+  const totalPags = Math.ceil(total / POR_PAGINA);
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  if (totalPags <= 1) return;
+
+  const prev = document.createElement('button');
+  prev.className = 'page-btn';
+  prev.textContent = '‹';
+  prev.disabled = paginaAtual === 1;
+  prev.onclick = () => onPage(paginaAtual - 1);
+  container.appendChild(prev);
+
+  // Páginas
+  const range = [];
+  for (let p = 1; p <= totalPags; p++) {
+    if (p === 1 || p === totalPags || Math.abs(p - paginaAtual) <= 2) range.push(p);
+    else if (range[range.length-1] !== '...') range.push('...');
+  }
+
+  range.forEach(p => {
+    if (p === '...') {
+      const span = document.createElement('span');
+      span.className = 'page-info';
+      span.textContent = '…';
+      container.appendChild(span);
+    } else {
+      const btn = document.createElement('button');
+      btn.className = 'page-btn' + (p === paginaAtual ? ' active' : '');
+      btn.textContent = p;
+      btn.onclick = () => onPage(p);
+      container.appendChild(btn);
+    }
+  });
+
+  const next = document.createElement('button');
+  next.className = 'page-btn';
+  next.textContent = '›';
+  next.disabled = paginaAtual === totalPags;
+  next.onclick = () => onPage(paginaAtual + 1);
+  container.appendChild(next);
+}
+
+// ============================
+// EXPORT CSV
+// ============================
+function exportarCSV(tipo) {
+  let dados, headers, rows;
+
+  if (tipo === 'editais') {
+    dados = dadosEditais;
+    headers = ['Objeto','Orgao','Modalidade','Valor Estimado','Data Publicacao','Data Abertura'];
+    rows = dados.map(i => [
+      (i.objetoCompra || i.descricao || '').replace(/;/g,' '),
+      (i.orgaoEntidade?.razaoSocial || i.nomeOrgao || '').replace(/;/g,' '),
+      MODALIDADES[i.modalidadeId] || i.modalidadeNome || '',
+      i.valorTotalEstimado || i.valorEstimado || '',
+      fmtDataBR(i.dataPublicacaoPncp || i.dataPublicacao),
+      fmtDataBR(i.dataAberturaProposta || i.dataAbertura),
+    ]);
+  } else {
+    dados = dadosCon;
+    headers = ['Concorrente','Objeto','Orgao Contratante','Valor','Data Assinatura','Vigencia Inicio','Vigencia Fim'];
+    rows = dados.map(i => {
+      const conc = getConcorrenteByConjpj(i._cnpjBuscado);
+      return [
+        conc ? conc.nome : i._cnpjBuscado,
+        (i.objetoContrato || i.descricao || '').replace(/;/g,' '),
+        (i.orgaoEntidade?.razaoSocial || i.nomeOrgao || '').replace(/;/g,' '),
+        i.valorInicial || i.valorGlobal || '',
+        fmtDataBR(i.dataAssinatura),
+        fmtDataBR(i.dataVigenciaInicio),
+        fmtDataBR(i.dataVigenciaFim),
+      ];
+    });
+  }
+
+  const csv = [headers, ...rows].map(r => r.join(';')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `metroqual_${tipo}_${fmtDate(new Date())}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
