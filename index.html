@@ -1119,7 +1119,7 @@ function setAlert(id, msg) {
 // ============================
 // API PNCP
 // ============================
-const PNCP_BASE = 'https://pncp.gov.br/api/pncp/v1';
+const PROXY_URL = 'https://n8n.srv1567250.hstgr.cloud/webhook/pncp-proxy';
 
 async function apiGet(url) {
   const r = await fetch(url);
@@ -1149,24 +1149,16 @@ async function buscarEditais() {
   document.getElementById('btn-export-editais').disabled = true;
 
   try {
-    // PNCP: busca publicações
     const dtIni = dateStart.replace(/-/g,'');
     const dtFim = dateEnd.replace(/-/g,'');
 
-    let url = `${PNCP_BASE}/contratacoes/publicacao?dataInicial=${dtIni}&dataFinal=${dtFim}&tamanhoPagina=500&pagina=1`;
-    if (modalidade) url += `&codigoModalidadeContratacao=${modalidade}`;
+    const params = new URLSearchParams({ tipo: 'editais', dtIni, dtFim, keyword, pagina: '1' });
+    if (modalidade) params.append('modalidade', modalidade);
 
-    const data = await apiGet(url);
+    const data = await apiGet(`${PROXY_URL}?${params}`);
     let itens = data.data || [];
 
-    // Filtro por keyword
-    const kw = keyword.toLowerCase();
-    itens = itens.filter(i => {
-      const obj = (i.objetoCompra || i.descricao || '').toLowerCase();
-      return obj.includes(kw);
-    });
-
-    // Filtro por tipo de órgão
+    // Filtro por tipo de órgão (client-side)
     if (orgaoTipoFiltro) {
       itens = itens.filter(i => {
         const nome = (i.orgaoEntidade?.razaoSocial || i.nomeOrgao || '').toLowerCase();
@@ -1272,11 +1264,11 @@ async function buscarConcorrentes() {
 
     let todos = [];
 
-    // Busca contratos para cada CNPJ selecionado
+    // Busca contratos para cada CNPJ selecionado via proxy
     for (const cnpj of cnpjs) {
       try {
-        const url = `${PNCP_BASE}/contratos?cnpjFornecedor=${cnpj}&dataInicial=${dtIni}&dataFinal=${dtFim}&tamanhoPagina=100&pagina=1`;
-        const data = await apiGet(url);
+        const params = new URLSearchParams({ tipo: 'contratos', dtIni, dtFim, cnpj, pagina: '1' });
+        const data = await apiGet(`${PROXY_URL}?${params}`);
         const itens = (data.data || []).map(i => ({ ...i, _cnpjBuscado: cnpj }));
         todos = todos.concat(itens);
       } catch(e) {
